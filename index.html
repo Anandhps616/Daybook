@@ -175,7 +175,7 @@ details.others .row { background: var(--bg); }
 .row.plain { grid-template-columns: minmax(0, 1fr) auto; padding: 4px 14px; }
 
 /* Form */
-.form { background: var(--surface); border-radius: 16px; padding: 16px; display: grid; gap: 14px; }
+.form { background: var(--surface); border-radius: 16px; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 .form h3 { margin: 0; font-family: var(--f-display); font-size: 18px; font-weight: 600; }
 .field { display: grid; gap: 6px; min-width: 0; }
 .field label { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
@@ -197,6 +197,81 @@ details.others .row { background: var(--bg); }
 .foot p { margin: 0; }
 .foot .status { font-size: 12px; }
 .foot .status.bad { color: var(--bad); }
+
+/* Tabs */
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 14px; }
+.tab { min-height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font-weight: 600; font-size: 15px; }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14); }
+.view { display: flex; flex-direction: column; gap: 18px; }
+
+/* Habits */
+.hsum { background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.hhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.hcount { font-family: var(--f-mono); color: var(--muted); font-size: 14px; }
+.hcap { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.hmonth { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hmonth h2 { flex: 1; text-align: center; }
+.iconbtn { width: 44px; height: 44px; flex: none; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); display: grid; place-items: center; }
+.iconbtn:disabled { opacity: 0.35; cursor: default; }
+.hstats { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.hrate { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hbig { font-family: var(--f-display); font-weight: 700; font-size: 44px; line-height: 1.05; color: var(--accent); }
+.hsub { font-size: 13px; color: var(--muted); }
+.hdonut { position: relative; width: 112px; height: 112px; flex: none; }
+.hdonut svg { width: 100%; height: 100%; display: block; }
+.hdonut circle { fill: none; stroke-width: 12; }
+.hdonut .trk { stroke: var(--surface-2); }
+.hdonut .val { stroke: var(--accent); transition: stroke-dasharray 0.35s ease; }
+.hdtxt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; }
+.hdtxt b { font-family: var(--f-mono); font-size: 18px; font-weight: 500; }
+.hdtxt span { font-size: 11px; color: var(--muted); }
+.hweeks { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; align-items: end; }
+.hw { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.hw-pct { font-family: var(--f-mono); font-size: 12px; }
+.hw-bar { width: 100%; max-width: 44px; height: 56px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: flex-end; overflow: hidden; }
+.hw-bar i { display: block; width: 100%; background: var(--accent); }
+.hw.none .hw-bar { background: transparent; border: 1px dashed var(--line); }
+.hw-lbl { font-size: 11px; color: var(--muted); font-weight: 600; }
+.hprog { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.hp { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: baseline; }
+.hp-name { font-weight: 600; overflow-wrap: anywhere; }
+.hp-n { font-family: var(--f-mono); font-size: 13px; color: var(--muted); }
+.hp-track { grid-column: 1 / -1; height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.hp-track i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.35s ease; }
+.hnone { margin: 0; color: var(--muted); }
+.hchips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.hchip { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 12px; border: 1px solid var(--line); background: var(--bg); border-radius: 12px; text-align: left; font-weight: 600; font-size: 14px; }
+.hchip .hn { min-width: 0; overflow-wrap: anywhere; }
+.hchip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.hbox { width: 24px; height: 24px; flex: none; border-radius: 7px; border: 2px solid var(--muted); display: grid; place-items: center; color: transparent; transition: background 0.15s, border-color 0.15s; }
+[aria-pressed="true"] > .hbox { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.hgridwrap { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: auto; max-height: min(72vh, 600px); }
+.hgrid { border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; font-size: 13px; }
+.hgrid th, .hgrid td { padding: 0; background: var(--surface); border-bottom: 1px solid var(--line); text-align: center; }
+.hgrid thead th { position: sticky; top: 0; z-index: 2; background: var(--accent); color: var(--accent-ink); font-size: 11.5px; line-height: 1.2; font-weight: 600; padding: 10px 6px; vertical-align: bottom; overflow-wrap: anywhere; }
+.hgrid .hdate { position: sticky; left: 0; z-index: 1; width: 62px; min-width: 62px; padding: 0 8px; text-align: left; border-right: 1px solid var(--line); }
+.hgrid thead .hdate { z-index: 3; vertical-align: bottom; padding: 10px 8px; }
+.hdate .dow { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.hdate .dn { font-family: var(--f-mono); font-size: 15px; font-weight: 500; }
+.hgrid tr.alldone th, .hgrid tr.alldone td { background: var(--accent-soft); }
+.hgrid tr.today .hdate { box-shadow: inset 3px 0 0 var(--accent); }
+.hgrid tr.today .dn { color: var(--accent); font-weight: 600; }
+.hgrid tr.hwk th { background: var(--surface-2); color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; padding: 6px 8px; }
+.hgrid tr.hwk span { position: sticky; left: 8px; display: inline-block; }
+.hcell { display: grid; place-items: center; width: 100%; height: 44px; padding: 0; border: 0; background: transparent; }
+.hcell:disabled { opacity: 0.3; cursor: default; }
+.hcell .hbox { width: 22px; height: 22px; border-radius: 6px; }
+.hgrid .hdn { min-width: 62px; padding: 6px 8px; }
+.hdn .mono { display: block; font-size: 12px; }
+.hmini { display: block; height: 4px; margin-top: 4px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.hmini i { display: block; height: 100%; background: var(--accent); }
+.hedit-list { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.hedit, .hadd { display: flex; gap: 8px; align-items: center; }
+.hedit input, .hadd input { flex: 1; min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); padding: 8px 12px; }
+@media (max-width: 380px) {
+  .hbig { font-size: 36px; }
+  .hdonut { width: 96px; height: 96px; }
+}
 
 @media (max-width: 420px) {
   h1 { font-size: 26px; }
@@ -220,6 +295,12 @@ details.others .row { background: var(--bg); }
 
   <section class="alerts" id="alerts" aria-live="polite"></section>
 
+  <nav class="tabs" role="tablist" aria-label="Daybook sections" id="tabs">
+    <button type="button" class="tab" role="tab" id="tabToday" aria-selected="true" aria-controls="viewToday">Today</button>
+    <button type="button" class="tab" role="tab" id="tabHabits" aria-selected="false" aria-controls="viewHabits" tabindex="-1">Habits</button>
+  </nav>
+
+  <div class="view" id="viewToday" role="tabpanel" aria-labelledby="tabToday">
   <section class="summary" aria-label="Today's progress">
     <div class="sum-head">
       <div class="sum-count" id="sumCount"></div>
@@ -298,6 +379,67 @@ details.others .row { background: var(--bg); }
     <summary id="othersSum"></summary>
     <ol class="rows" id="othersList"></ol>
   </details>
+  </div>
+
+  <div class="view" id="viewHabits" role="tabpanel" aria-labelledby="tabHabits" hidden>
+    <section class="hsum" id="hTodayCard" aria-label="Today's habits" hidden>
+      <div class="hhead">
+        <h2>Today's habits</h2>
+        <span class="hcount" id="hTodayCount"></span>
+      </div>
+      <div class="hchips" id="hChips"></div>
+    </section>
+
+    <section class="hsum" aria-label="Monthly habit summary">
+      <div class="hmonth">
+        <button type="button" class="iconbtn" id="hPrev" aria-label="Previous month"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+        <h2 id="hMonth"></h2>
+        <button type="button" class="iconbtn" id="hNext" aria-label="Next month"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+      <div class="hstats">
+        <div class="hrate">
+          <span class="hcap">Average completion</span>
+          <span class="hbig" id="hAvg">&ndash;</span>
+          <span class="hsub" id="hAvgSub"></span>
+        </div>
+        <div class="hdonut" id="hDonut" role="img" aria-label="">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="trk" cx="50" cy="50" r="40"></circle>
+            <circle class="val" id="hArc" cx="50" cy="50" r="40" stroke-dasharray="0 251.33" transform="rotate(-90 50 50)"></circle>
+          </svg>
+          <div class="hdtxt"><b id="hDone">0</b><span id="hOf">of 0</span></div>
+        </div>
+      </div>
+      <div class="hcap">Completion by week</div>
+      <div class="hweeks" id="hWeeks"></div>
+      <div class="hcap">Habit progress</div>
+      <ul class="hprog" id="hProg"></ul>
+      <p class="hnone" id="hNone" hidden>No habits yet. Tap Edit habits to add some.</p>
+    </section>
+
+    <div class="list-head">
+      <h2>Month grid</h2>
+      <button type="button" class="btn" id="hEditBtn" aria-expanded="false" aria-controls="hForm">Edit habits</button>
+    </div>
+
+    <form class="form" id="hForm" hidden novalidate>
+      <h3>Your habits</h3>
+      <div class="hedit-list" id="hEditList"></div>
+      <div class="field">
+        <label for="hNew">Add a habit</label>
+        <div class="hadd">
+          <input id="hNew" type="text" maxlength="30" autocomplete="off" placeholder="Walk 8,000 steps">
+          <button type="submit" class="btn primary">Add</button>
+        </div>
+      </div>
+      <p class="err" id="hErr" role="alert"></p>
+      <div class="acts"><button type="button" class="btn" id="hDoneBtn">Done</button></div>
+    </form>
+
+    <div class="hgridwrap" id="hWrap" role="region" aria-label="Month grid. Scrolls sideways." tabindex="0">
+      <table class="hgrid" id="hGrid"></table>
+    </div>
+  </div>
 
   <footer class="foot">
     <div class="switches">
@@ -316,6 +458,8 @@ details.others .row { background: var(--bg); }
   'use strict';
 
   var KEY = 'daybook-v1';
+  var DEFAULT_HABITS = ['Exercise', 'Drink 2 litres of water', 'Sleep 8 hours', 'Study for 2 hours', 'Read and meditate'];
+  var MAX_HABITS = 8;
   var CATS = { health: 'Health', work: 'Work & study', home: 'Home', personal: 'Personal' };
   var REPEATS = { daily: 'Every day', weekdays: 'Weekdays', weekends: 'Weekends', once: 'Today only' };
   var DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -345,12 +489,14 @@ details.others .row { background: var(--bg); }
   function mk(title, time, cat, repeat, lead, added) {
     return { id: uid(), title: title, time: time, cat: cat, repeat: repeat, lead: lead, added: added };
   }
+  function defaultHabits() { return DEFAULT_HABITS.map(function (n) { return { id: uid(), name: n }; }); }
   function defaultState() {
     var k = dkey(new Date());
     return {
       v: 1, examples: true,
       settings: { sound: true, wake: false, notify: false },
       log: {},
+      habits: defaultHabits(), hlog: {},
       activities: [
         mk('Wake up and stretch', '06:30', 'health', 'daily', 0, k),
         mk('Breakfast', '08:00', 'home', 'daily', 0, k),
@@ -369,6 +515,9 @@ details.others .row { background: var(--bg); }
     s.settings = Object.assign({ sound: true, wake: false, notify: false }, s.settings || {});
     s.log = s.log && typeof s.log === 'object' ? s.log : {};
     s.activities = Array.isArray(s.activities) ? s.activities : [];
+    if (!Array.isArray(s.habits)) s.habits = defaultHabits();
+    s.habits = s.habits.filter(function (h) { return h && typeof h.id === 'string' && typeof h.name === 'string'; }).slice(0, MAX_HABITS);
+    s.hlog = s.hlog && typeof s.hlog === 'object' && !Array.isArray(s.hlog) ? s.hlog : {};
     return s;
   }
 
@@ -506,7 +655,7 @@ details.others .row { background: var(--bg); }
       });
     } catch (e) { /* ignore */ }
   }
-  function buzz() { try { if (navigator.vibrate) navigator.vibrate([120, 60, 120]); } catch (e) { /* ignore */ } }
+  function buzz() { try { if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate([120, 60, 120]); } catch (e) { /* ignore */ } }
   function setWake(on, quiet) {
     try {
       if (on) {
@@ -725,7 +874,266 @@ details.others .row { background: var(--bg); }
   function renderAll(force) {
     renderHead(); renderAlerts(force); renderSummary(); renderList(force);
     renderNote(); renderSwitches(); renderStatus();
+    renderHabits();
   }
+
+  /* ---------- habits ---------- */
+  var CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  var tab = 'today';
+  var hNow0 = new Date();
+  var hCurY = hNow0.getFullYear(), hCurM = hNow0.getMonth();
+  var hy = hCurY, hm = hCurM;
+  var hFocus = null, hConfirm = null;
+
+  function mkey(y, m) { return y + '-' + pad(m + 1); }
+  function monthInfo(y, m) {
+    var now = new Date(), cy = now.getFullYear(), cm = now.getMonth();
+    var days = new Date(y, m + 1, 0).getDate();
+    var isCur = y === cy && m === cm;
+    var past = y < cy || (y === cy && m < cm);
+    return { days: days, isCur: isCur, today: now.getDate(), elapsed: past ? days : (isCur ? now.getDate() : 0), monthsBack: (cy * 12 + cm) - (y * 12 + m) };
+  }
+  function hIsDone(hid, y, m, d) {
+    var mo = state.hlog[mkey(y, m)];
+    var a = mo && mo[hid];
+    return Array.isArray(a) && a.indexOf(d) !== -1;
+  }
+  function pctText(f) { return Math.round(f * 100) + '%'; }
+  function dayName(d) { return new Date(hy, hm, d).toLocaleDateString(undefined, { weekday: 'short' }); }
+
+  function renderHabits() {
+    var H = state.habits, n = H.length;
+    var info = monthInfo(hy, hm), days = info.days, el_ = info.elapsed;
+    var monthName = new Date(hy, hm, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    var monthShort = new Date(hy, hm, 1).toLocaleDateString(undefined, { month: 'short' });
+    $('#hMonth').textContent = monthName;
+    $('#hNext').disabled = info.monthsBack <= 0;
+    $('#hPrev').disabled = info.monthsBack >= 24;
+
+    // counts (only days that have happened)
+    function countFor(hid, from, to) {
+      var c = 0;
+      for (var d = from; d <= to && d <= el_; d++) if (hIsDone(hid, hy, hm, d)) c++;
+      return c;
+    }
+    var per = H.map(function (h) { return countFor(h.id, 1, days); });
+    var monthDone = per.reduce(function (a, b) { return a + b; }, 0);
+    var possibleSoFar = n * el_, monthTotal = n * days;
+
+    // average + donut
+    $('#hAvg').textContent = possibleSoFar ? pctText(monthDone / possibleSoFar) : '–';
+    $('#hAvgSub').textContent = !n ? 'No habits yet' : (el_ ? 'Over ' + el_ + (el_ === 1 ? ' day' : ' days') + ' so far' : 'This month has not started');
+    var frac = monthTotal ? monthDone / monthTotal : 0, C = 251.33;
+    $('#hArc').setAttribute('stroke-dasharray', (frac * C).toFixed(2) + ' ' + (C - frac * C).toFixed(2));
+    $('#hDone').textContent = String(monthDone);
+    $('#hOf').textContent = 'of ' + monthTotal;
+    $('#hDonut').setAttribute('aria-label', monthDone + ' of ' + monthTotal + ' habit checks done in ' + monthName);
+
+    // weeks (Monday to Sunday)
+    var weeks = [], w = null;
+    for (var d = 1; d <= days; d++) {
+      var dow = new Date(hy, hm, d).getDay();
+      if (!w || dow === 1) { w = { start: d, end: d }; weeks.push(w); }
+      w.end = d;
+    }
+    var wbox = $('#hWeeks');
+    wbox.textContent = '';
+    weeks.forEach(function (wk, i) {
+      var elapsedDays = Math.max(0, Math.min(wk.end, el_) - wk.start + 1);
+      var done = 0;
+      H.forEach(function (h) { done += countFor(h.id, wk.start, wk.end); });
+      var poss = elapsedDays * n;
+      var f = poss ? done / poss : null;
+      var col = el('div', 'hw' + (f == null ? ' none' : ''));
+      var range = monthShort + ' ' + wk.start + (wk.end > wk.start ? '–' + wk.end : '');
+      col.setAttribute('role', 'img');
+      col.setAttribute('aria-label', 'Week ' + (i + 1) + ', ' + range + ': ' + (f == null ? 'no data yet' : pctText(f)));
+      col.appendChild(el('span', 'hw-pct', f == null ? '–' : pctText(f)));
+      var bar = el('div', 'hw-bar'), fill = document.createElement('i');
+      fill.style.height = (f == null ? 0 : Math.round(f * 100)) + '%';
+      bar.appendChild(fill); col.appendChild(bar);
+      col.appendChild(el('span', 'hw-lbl', 'Wk ' + (i + 1)));
+      wbox.appendChild(col);
+    });
+
+    // per-habit progress
+    var prog = $('#hProg');
+    prog.textContent = '';
+    H.forEach(function (h, i) {
+      var li = el('li', 'hp');
+      li.appendChild(el('span', 'hp-name', h.name));
+      li.appendChild(el('span', 'hp-n', per[i] + ' / ' + el_));
+      var tr = el('span', 'hp-track'), f2 = document.createElement('i');
+      f2.style.width = (el_ ? Math.round(per[i] / el_ * 100) : 0) + '%';
+      tr.appendChild(f2); li.appendChild(tr);
+      prog.appendChild(li);
+    });
+    $('#hNone').hidden = n > 0;
+
+    // today card
+    var card = $('#hTodayCard');
+    card.hidden = !(info.isCur && n > 0);
+    if (!card.hidden) {
+      var chips = $('#hChips');
+      chips.textContent = '';
+      var doneToday = 0;
+      H.forEach(function (h) {
+        var on = hIsDone(h.id, hy, hm, info.today);
+        if (on) doneToday++;
+        var b = el('button', 'hchip'); b.type = 'button';
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.dataset.h = h.id; b.dataset.d = String(info.today); b.dataset.src = 'chip';
+        var box = el('span', 'hbox'); box.innerHTML = CHECK;
+        b.appendChild(box); b.appendChild(el('span', 'hn', h.name));
+        chips.appendChild(b);
+      });
+      $('#hTodayCount').textContent = doneToday + ' / ' + n;
+    }
+
+    // grid
+    $('#hWrap').hidden = n === 0;
+    var tbl = $('#hGrid');
+    tbl.textContent = '';
+    if (n) {
+      var thead = document.createElement('thead'), hr = document.createElement('tr');
+      var th0 = el('th', 'hdate', 'Day'); th0.scope = 'col'; hr.appendChild(th0);
+      H.forEach(function (h) { var th = el('th', null, h.name); th.scope = 'col'; hr.appendChild(th); });
+      var thd = el('th', null, 'Done'); thd.scope = 'col'; thd.style.width = '62px'; hr.appendChild(thd);
+      thead.appendChild(hr); tbl.appendChild(thead);
+      tbl.style.minWidth = (124 + n * 72) + 'px';
+      var tb = document.createElement('tbody');
+      weeks.forEach(function (wk, wi) {
+        var wr = el('tr', 'hwk'), wh = document.createElement('th');
+        wh.colSpan = n + 2; wh.scope = 'colgroup';
+        wh.appendChild(el('span', null, 'Week ' + (wi + 1) + ' · ' + monthShort + ' ' + wk.start + (wk.end > wk.start ? '–' + wk.end : '')));
+        wr.appendChild(wh); tb.appendChild(wr);
+        for (var d2 = wk.start; d2 <= wk.end; d2++) {
+          var future = d2 > el_, isToday = info.isCur && d2 === info.today;
+          var doneN = 0;
+          H.forEach(function (h) { if (!future && hIsDone(h.id, hy, hm, d2)) doneN++; });
+          var tr2 = el('tr', (doneN === n ? 'alldone' : '') + (isToday ? ' today' : '') + (future ? ' future' : ''));
+          var dh = el('th', 'hdate'); dh.scope = 'row';
+          if (isToday) dh.setAttribute('aria-current', 'date');
+          dh.appendChild(el('span', 'dow', dayName(d2)));
+          dh.appendChild(el('span', 'dn', String(d2)));
+          tr2.appendChild(dh);
+          H.forEach(function (h) {
+            var td = document.createElement('td');
+            var on = !future && hIsDone(h.id, hy, hm, d2);
+            var b = el('button', 'hcell'); b.type = 'button';
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            b.setAttribute('aria-label', h.name + ', ' + dayName(d2) + ' ' + d2 + ' ' + monthShort);
+            b.dataset.h = h.id; b.dataset.d = String(d2); b.dataset.src = 'cell';
+            if (future) b.disabled = true;
+            var box = el('span', 'hbox'); box.innerHTML = CHECK;
+            b.appendChild(box); td.appendChild(b); tr2.appendChild(td);
+          });
+          var dd = el('td', 'hdn');
+          dd.appendChild(el('span', 'mono', future ? '–' : doneN + '/' + n));
+          var mini = el('span', 'hmini'), mf = document.createElement('i');
+          mf.style.width = (future || !n ? 0 : Math.round(doneN / n * 100)) + '%';
+          mini.appendChild(mf); dd.appendChild(mini); tr2.appendChild(dd);
+          tb.appendChild(tr2);
+        }
+      });
+      tbl.appendChild(tb);
+    }
+
+    if (hFocus) {
+      var f3 = document.querySelector(hFocus);
+      if (f3 && !f3.disabled) f3.focus({ preventScroll: true });
+      hFocus = null;
+    }
+  }
+
+  function toggleHabit(hid, day, src) {
+    var info = monthInfo(hy, hm);
+    if (day < 1 || day > info.elapsed) return;
+    var k = mkey(hy, hm);
+    var mo = state.hlog[k] || (state.hlog[k] = {});
+    var a = mo[hid] || (mo[hid] = []);
+    var i = a.indexOf(day);
+    if (i === -1) a.push(day); else a.splice(i, 1);
+    hFocus = (src === 'chip' ? '.hchip' : '.hcell') + '[data-h="' + hid + '"]' + (src === 'chip' ? '' : '[data-d="' + day + '"]');
+    save();
+    renderHabits();
+  }
+  function onHabitClick(e) {
+    var b = e.target.closest('button[data-h]');
+    if (!b || b.disabled) return;
+    toggleHabit(b.dataset.h, +b.dataset.d, b.dataset.src);
+  }
+  $('#hGrid').addEventListener('click', onHabitClick);
+  $('#hChips').addEventListener('click', onHabitClick);
+
+  $('#hPrev').addEventListener('click', function () {
+    var d = new Date(hy, hm - 1, 1); hy = d.getFullYear(); hm = d.getMonth(); renderHabits();
+  });
+  $('#hNext').addEventListener('click', function () {
+    var d = new Date(hy, hm + 1, 1); hy = d.getFullYear(); hm = d.getMonth(); renderHabits();
+  });
+
+  /* habit editor */
+  function renderEditor() {
+    hConfirm = null;
+    var box = $('#hEditList');
+    box.textContent = '';
+    state.habits.forEach(function (h) {
+      var row = el('div', 'hedit');
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.maxLength = 30; inp.value = h.name; inp.setAttribute('aria-label', 'Habit name');
+      inp.addEventListener('change', function () {
+        var v = inp.value.trim();
+        if (!v) { inp.value = h.name; return; }
+        h.name = v; save(); renderHabits();
+      });
+      var del = el('button', 'btn danger', 'Remove'); del.type = 'button';
+      del.setAttribute('aria-label', 'Remove ' + h.name);
+      del.addEventListener('click', function () {
+        if (hConfirm !== h.id) { hConfirm = h.id; del.textContent = 'Tap again'; return; }
+        state.habits = state.habits.filter(function (x) { return x.id !== h.id; });
+        Object.keys(state.hlog).forEach(function (k) { delete state.hlog[k][h.id]; });
+        save(); renderEditor(); renderHabits();
+      });
+      row.appendChild(inp); row.appendChild(del); box.appendChild(row);
+    });
+  }
+  function setEditor(open) {
+    $('#hForm').hidden = !open;
+    $('#hEditBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+    $('#hEditBtn').textContent = open ? 'Close' : 'Edit habits';
+    if (open) { renderEditor(); $('#hErr').textContent = ''; $('#hForm').scrollIntoView({ block: 'nearest' }); }
+  }
+  $('#hEditBtn').addEventListener('click', function () { setEditor($('#hForm').hidden); });
+  $('#hDoneBtn').addEventListener('click', function () { setEditor(false); });
+  $('#hForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var inp = $('#hNew'), name = inp.value.trim();
+    if (!name) { $('#hErr').textContent = 'Type a habit name.'; inp.focus(); return; }
+    if (state.habits.length >= MAX_HABITS) { $('#hErr').textContent = 'You can track up to ' + MAX_HABITS + ' habits.'; return; }
+    state.habits.push({ id: uid(), name: name });
+    inp.value = ''; $('#hErr').textContent = '';
+    save(); renderEditor(); renderHabits(); inp.focus();
+  });
+
+  /* tabs */
+  function showTab(name, focus) {
+    tab = name;
+    $('#viewToday').hidden = name !== 'today';
+    $('#viewHabits').hidden = name !== 'habits';
+    [['today', '#tabToday'], ['habits', '#tabHabits']].forEach(function (p) {
+      var b = $(p[1]), on = p[0] === name;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    if (name === 'habits') renderHabits();
+  }
+  $('#tabToday').addEventListener('click', function () { showTab('today'); });
+  $('#tabHabits').addEventListener('click', function () { showTab('habits'); });
+  $('#tabs').addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); showTab(tab === 'today' ? 'habits' : 'today', true); }
+  });
 
   /* ---------- actions ---------- */
   function toggle(id) {
@@ -840,7 +1248,13 @@ details.others .row { background: var(--bg); }
   function tick() {
     var k = dkey(new Date());
     var forced = false;
-    if (k !== curKey) { curKey = k; alerted = {}; snooze = {}; forced = true; }
+    if (k !== curKey) {
+      curKey = k; alerted = {}; snooze = {}; forced = true;
+      var nn = new Date();
+      if (hy === hCurY && hm === hCurM) { hy = nn.getFullYear(); hm = nn.getMonth(); }
+      hCurY = nn.getFullYear(); hCurM = nn.getMonth();
+      renderHabits();
+    }
     renderHead();
     renderAlerts(forced);
     renderSummary();
