@@ -199,10 +199,26 @@ details.others .row { background: var(--bg); }
 .foot .status.bad { color: var(--bad); }
 
 /* Tabs */
-.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 14px; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 14px; }
 .tab { min-height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font-weight: 600; font-size: 15px; }
 .tab[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14); }
 .view { display: flex; flex-direction: column; gap: 18px; }
+
+
+/* Assistant */
+.msgs { display: flex; flex-direction: column; gap: 8px; min-height: 180px; max-height: min(52vh, 440px); overflow-y: auto; padding: 2px; }
+.msg { max-width: 88%; padding: 10px 12px; border-radius: 14px; font-size: 15px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg.bot { align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 4px; }
+.msg.user { align-self: flex-end; background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 4px; }
+.msg.pending { color: var(--muted); font-style: italic; }
+.msg .undo { display: block; margin-top: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; min-height: 36px; padding: 4px 12px; font-weight: 600; font-size: 13px; }
+.msg .undo:disabled { opacity: 0.6; }
+.sugs { display: flex; flex-wrap: wrap; gap: 8px; }
+.sug { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; min-height: 40px; padding: 6px 12px; font-size: 13px; font-weight: 500; }
+.cform { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.cform input { min-width: 0; min-height: 46px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 8px 12px; font-size: 16px; }
+.cnote { margin: 0; font-size: 12px; color: var(--muted); }
+.cmode { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
 
 /* Habits */
 .hsum { background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
@@ -300,6 +316,7 @@ details.others .row { background: var(--bg); }
   <nav class="tabs" role="tablist" aria-label="Daybook sections" id="tabs">
     <button type="button" class="tab" role="tab" id="tabToday" aria-selected="true" aria-controls="viewToday">Today</button>
     <button type="button" class="tab" role="tab" id="tabHabits" aria-selected="false" aria-controls="viewHabits" tabindex="-1">Habits</button>
+    <button type="button" class="tab" role="tab" id="tabChat" aria-selected="false" aria-controls="viewChat" tabindex="-1">Assistant</button>
   </nav>
 
   <div class="view" id="viewToday" role="tabpanel" aria-labelledby="tabToday">
@@ -383,6 +400,23 @@ details.others .row { background: var(--bg); }
     <summary id="othersSum"></summary>
     <ol class="rows" id="othersList"></ol>
   </details>
+  </div>
+
+  <div class="view" id="viewChat" role="tabpanel" aria-labelledby="tabChat" hidden>
+    <section class="hsum chat" aria-label="Assistant">
+      <div class="hhead">
+        <h2>Assistant</h2>
+        <span class="cmode" id="chatMode">Basic commands</span>
+      </div>
+      <div class="msgs" id="msgs" role="log" aria-live="polite" aria-label="Conversation"></div>
+      <div class="sugs" id="sugs"></div>
+      <form class="cform" id="cform" autocomplete="off">
+        <input type="text" id="cinput" aria-label="Type a command" placeholder="Type a command..." enterkeyhint="send" maxlength="300">
+        <button type="submit" class="btn primary" id="csend">Send</button>
+        <button type="button" class="btn danger" id="cstop" hidden>Stop</button>
+      </form>
+      <p class="cnote" id="chatNote"></p>
+    </section>
   </div>
 
   <div class="view" id="viewHabits" role="tabpanel" aria-labelledby="tabHabits" hidden>
@@ -1128,22 +1162,27 @@ details.others .row { background: var(--bg); }
   });
 
   /* tabs */
+  var TABIDS = { today: '#tabToday', habits: '#tabHabits', chat: '#tabChat' };
+  var VIEWIDS = { today: '#viewToday', habits: '#viewHabits', chat: '#viewChat' };
+  var TABORDER = ['today', 'habits', 'chat'];
   function showTab(name, focus) {
     tab = name;
-    $('#viewToday').hidden = name !== 'today';
-    $('#viewHabits').hidden = name !== 'habits';
-    [['today', '#tabToday'], ['habits', '#tabHabits']].forEach(function (p) {
-      var b = $(p[1]), on = p[0] === name;
+    TABORDER.forEach(function (k) {
+      $(VIEWIDS[k]).hidden = k !== name;
+      var b = $(TABIDS[k]), on = k === name;
       b.setAttribute('aria-selected', on ? 'true' : 'false');
       b.tabIndex = on ? 0 : -1;
       if (on && focus) b.focus();
     });
     if (name === 'habits') renderHabits();
+    if (name === 'chat') { var m = $('#msgs'); m.scrollTop = m.scrollHeight; }
   }
-  $('#tabToday').addEventListener('click', function () { showTab('today'); });
-  $('#tabHabits').addEventListener('click', function () { showTab('habits'); });
+  TABORDER.forEach(function (k) { $(TABIDS[k]).addEventListener('click', function () { showTab(k); }); });
   $('#tabs').addEventListener('keydown', function (e) {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); showTab(tab === 'today' ? 'habits' : 'today', true); }
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    var i = TABORDER.indexOf(tab) + (e.key === 'ArrowRight' ? 1 : -1);
+    showTab(TABORDER[(i + TABORDER.length) % TABORDER.length], true);
   });
 
   /* ---------- actions ---------- */
@@ -1317,6 +1356,517 @@ details.others .row { background: var(--bg); }
     exportIcs([a], 'daybook-' + slug + '.ics', '#icsOneMsg');
   });
 
+  /* ---------- assistant: the actions it can take ---------- */
+  var LEADS = [0, 5, 10, 30];
+  function norm(t) { return String(t == null ? '' : t).toLowerCase().replace(/[^a-z0-9ഀ-ൿ ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function mkTime(h, m, ap) {
+    h = +h; m = +m || 0;
+    if (ap) {
+      if (h < 1 || h > 12) return null;
+      if (ap === 'p' && h < 12) h += 12;
+      if (ap === 'a' && h === 12) h = 0;
+    }
+    if (h > 23 || m > 59) return null;
+    return pad(h) + ':' + pad(m);
+  }
+  function parseClock(v) {
+    var t = String(v == null ? '' : v).trim().toLowerCase();
+    if (t === 'noon') return '12:00';
+    if (t === 'midnight') return '00:00';
+    var m = t.match(/^(\d{1,2})(?:[:.h](\d{2}))?\s*(?:([ap])\.?m\.?)?$/);
+    if (m) return mkTime(m[1], m[2], m[3]);
+    m = t.match(/^(\d{2})(\d{2})$/);
+    return m ? mkTime(m[1], m[2]) : null;
+  }
+  function nearestLead(n) {
+    n = +n;
+    if (isNaN(n) || n < 0) return -1;
+    var best = 0;
+    LEADS.forEach(function (l) { if (Math.abs(l - n) < Math.abs(best - n)) best = l; });
+    return best;
+  }
+  function guessCat(t) {
+    t = norm(t);
+    if (/\b(job|work|study|read|class|email|apply|applications?|office|meeting|project|learn|exam|duty|shift|course|homework|revise)\b/.test(t)) return 'work';
+    if (/\b(gym|exercise|workout|walk|run|yoga|medic\w*|pills?|tablets?|water|sleep|doctor|meditat\w*|stretch|breakfast|lunch|dinner|meal|eat|vitamin|drink)\b/.test(t)) return 'health';
+    if (/\b(clean\w*|laundry|cook\w*|grocer\w*|shop\w*|bills?|dish\w*|garden|trash|house|home|iron|water plants)\b/.test(t)) return 'home';
+    return 'personal';
+  }
+  function leadText(l) { l = +l; return l < 0 ? 'no reminder' : (l === 0 ? 'reminder at the time' : 'reminder ' + l + ' min before'); }
+  function describe(a) {
+    return '“' + a.title + '” at ' + fmt(toMin(a.time)) + ', ' + String(REPEATS[a.repeat] || a.repeat).toLowerCase() + ', ' + leadText(a.lead);
+  }
+  function findActs(q) {
+    var n = norm(q);
+    if (!n) return [];
+    var all = state.activities, ex = all.filter(function (a) { return norm(a.title) === n; });
+    if (ex.length) return ex;
+    var part = all.filter(function (a) { var t = norm(a.title); return t.indexOf(n) !== -1 || (t.length > 2 && n.indexOf(t) !== -1); });
+    if (part.length) return part;
+    var words = n.split(' ').filter(function (w) { return w.length > 2; });
+    if (!words.length) return [];
+    return all.filter(function (a) { var t = norm(a.title); return words.every(function (w) { return t.indexOf(w) !== -1; }); });
+  }
+  function oneAct(q) {
+    var l = findActs(q);
+    if (!l.length) throw new Error('I could not find an activity matching “' + q + '”.');
+    if (l.length > 1) throw new Error('More than one activity matches “' + q + '”: ' + l.map(function (a) { return a.title; }).join(', ') + '. Which one?');
+    return l[0];
+  }
+  function findHabs(q) {
+    var n = norm(q);
+    if (!n) return [];
+    var all = state.habits, ex = all.filter(function (h) { return norm(h.name) === n; });
+    if (ex.length) return ex;
+    var part = all.filter(function (h) { var t = norm(h.name); return t.indexOf(n) !== -1 || (t.length > 2 && n.indexOf(t) !== -1); });
+    if (part.length) return part;
+    var words = n.split(' ').filter(function (w) { return w.length > 2; });
+    if (!words.length) return [];
+    return all.filter(function (h) { var t = norm(h.name); return words.every(function (w) { return t.indexOf(w) !== -1; }); });
+  }
+  function oneHab(q) {
+    var l = findHabs(q);
+    if (!l.length) throw new Error('I could not find a habit matching “' + q + '”.');
+    if (l.length > 1) throw new Error('More than one habit matches “' + q + '”: ' + l.map(function (h) { return h.name; }).join(', ') + '. Which one?');
+    return l[0];
+  }
+  function changed() { save(); renderAll(true); }
+  function pickCat(v, title) { return CATS[v] ? v : guessCat(title); }
+  function pickRepeat(v) { return REPEATS[v] ? v : 'daily'; }
+  function needTime(v) {
+    var t = parseClock(v);
+    if (!t) throw new Error('I need a clear time, like 18:00 or 6 pm.');
+    return t;
+  }
+  function today0() { var d = new Date(); return { y: d.getFullYear(), m: d.getMonth(), d: d.getDate() }; }
+
+  var OPS = {
+    get_state: function () {
+      var d = new Date(), t = today0();
+      return {
+        today: dkey(d), weekday: d.toLocaleDateString('en-US', { weekday: 'long' }), now: pad(d.getHours()) + ':' + pad(d.getMinutes()),
+        activities: state.activities.map(function (a) {
+          return { title: a.title, time: a.time, category: a.cat, repeat: a.repeat, remind_minutes_before: +a.lead, scheduled_today: isScheduled(a, d), done_today: isDone(a.id, curKey) };
+        }),
+        habits: state.habits.map(function (h) {
+          var arr = (state.hlog[mkey(t.y, t.m)] || {})[h.id] || [];
+          return { name: h.name, done_today: arr.indexOf(t.d) !== -1, days_done_this_month: arr.length };
+        })
+      };
+    },
+    add_activity: function (i) {
+      var title = String(i.title || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+      if (!title) throw new Error('What should the activity be called?');
+      var time = needTime(i.time), repeat = pickRepeat(i.repeat);
+      var lead = i.remind_minutes_before == null ? 0 : nearestLead(i.remind_minutes_before);
+      var dup = state.activities.filter(function (a) { return norm(a.title) === norm(title) && a.time === time; })[0];
+      if (dup) return { ok: true, message: 'Already there: ' + describe(dup) + '.' };
+      var a = { id: uid(), title: title, time: time, cat: pickCat(i.category, title), repeat: repeat, lead: lead, added: curKey };
+      if (repeat === 'once') a.date = curKey;
+      state.activities.push(a);
+      changed();
+      return { ok: true, message: 'Added ' + describe(a) + '.' };
+    },
+    update_activity: function (i) {
+      var a = oneAct(i.match), did = false;
+      if (i.new_title != null && String(i.new_title).trim()) { a.title = String(i.new_title).replace(/\s+/g, ' ').trim().slice(0, 60); did = true; }
+      if (i.time != null) { a.time = needTime(i.time); did = true; }
+      if (i.category != null && CATS[i.category]) { a.cat = i.category; did = true; }
+      if (i.repeat != null && REPEATS[i.repeat]) {
+        a.repeat = i.repeat; did = true;
+        if (i.repeat === 'once') a.date = curKey; else delete a.date;
+      }
+      if (i.remind_minutes_before != null) { a.lead = nearestLead(i.remind_minutes_before); did = true; }
+      if (!did) throw new Error('Tell me what to change about “' + a.title + '”.');
+      changed();
+      return { ok: true, message: 'Updated: ' + describe(a) + '.' };
+    },
+    delete_activity: function (i) {
+      var a = oneAct(i.match);
+      state.activities = state.activities.filter(function (x) { return x.id !== a.id; });
+      Object.keys(state.log).forEach(function (k) { state.log[k] = state.log[k].filter(function (x) { return x !== a.id; }); });
+      changed();
+      return { ok: true, message: 'Deleted “' + a.title + '”.' };
+    },
+    set_activity_done: function (i) {
+      var a = oneAct(i.match), want = i.done !== false;
+      if (!isScheduled(a, new Date())) throw new Error('“' + a.title + '” is not scheduled for today.');
+      var l = state.log[curKey] || (state.log[curKey] = []), at = l.indexOf(a.id);
+      if (want && at === -1) l.push(a.id);
+      if (!want && at !== -1) l.splice(at, 1);
+      changed();
+      return { ok: true, message: want ? 'Marked “' + a.title + '” as done.' : 'Marked “' + a.title + '” as not done.' };
+    },
+    add_habit: function (i) {
+      var name = String(i.name || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+      if (!name) throw new Error('What should the habit be called?');
+      if (state.habits.some(function (h) { return norm(h.name) === norm(name); })) return { ok: true, message: 'You already track “' + name + '”.' };
+      if (state.habits.length >= MAX_HABITS) throw new Error('You can track up to ' + MAX_HABITS + ' habits. Remove one first.');
+      state.habits.push({ id: uid(), name: name });
+      changed();
+      return { ok: true, message: 'Now tracking the habit “' + name + '”.' };
+    },
+    rename_habit: function (i) {
+      var h = oneHab(i.match), name = String(i.new_name || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+      if (!name) throw new Error('What should the new name be?');
+      h.name = name; changed();
+      return { ok: true, message: 'Renamed the habit to “' + name + '”.' };
+    },
+    remove_habit: function (i) {
+      var h = oneHab(i.match);
+      state.habits = state.habits.filter(function (x) { return x.id !== h.id; });
+      Object.keys(state.hlog).forEach(function (k) { delete state.hlog[k][h.id]; });
+      changed();
+      return { ok: true, message: 'Removed the habit “' + h.name + '”.' };
+    },
+    set_habit_done: function (i) {
+      var h = oneHab(i.match), t = today0(), want = i.done !== false;
+      var day = i.day_of_month == null ? t.d : Math.floor(+i.day_of_month);
+      if (!(day >= 1 && day <= t.d)) throw new Error('I can only change days from the 1st up to today (' + t.d + ') of this month.');
+      var k = mkey(t.y, t.m), mo = state.hlog[k] || (state.hlog[k] = {}), arr = mo[h.id] || (mo[h.id] = []), at = arr.indexOf(day);
+      if (want && at === -1) arr.push(day);
+      if (!want && at !== -1) arr.splice(at, 1);
+      changed();
+      var when = day === t.d ? 'today' : 'on day ' + day;
+      return { ok: true, message: (want ? 'Ticked ' : 'Unticked ') + '“' + h.name + '” ' + when + '.' };
+    }
+  };
+
+  /* ---------- assistant: Claude (tools) ---------- */
+  function P(props, req) { return { type: 'object', properties: props, required: req || [] }; }
+  var STR = { type: 'string' };
+  var AI_TOOLS = [
+    { name: 'get_state', description: 'Read the current activities and habits and what is done today.', inputSchema: P({}) },
+    { name: 'add_activity', description: 'Add a scheduled activity with a reminder.', inputSchema: P({
+      title: STR, time: { type: 'string', description: '24-hour HH:MM, e.g. 18:30' },
+      category: { type: 'string', enum: ['health', 'work', 'home', 'personal'] },
+      repeat: { type: 'string', enum: ['daily', 'weekdays', 'weekends', 'once'], description: 'once = today only' },
+      remind_minutes_before: { type: 'number', description: '0 (at the time), 5, 10, 30, or -1 for no reminder' } }, ['title', 'time']) },
+    { name: 'update_activity', description: 'Change an existing activity. Only pass the fields to change.', inputSchema: P({
+      match: { type: 'string', description: 'Part of the current activity name' }, new_title: STR, time: STR,
+      category: { type: 'string', enum: ['health', 'work', 'home', 'personal'] },
+      repeat: { type: 'string', enum: ['daily', 'weekdays', 'weekends', 'once'] }, remind_minutes_before: { type: 'number' } }, ['match']) },
+    { name: 'delete_activity', description: 'Delete one activity.', inputSchema: P({ match: STR }, ['match']) },
+    { name: 'set_activity_done', description: 'Mark a scheduled activity done or not done for today.', inputSchema: P({ match: STR, done: { type: 'boolean' } }, ['match']) },
+    { name: 'add_habit', description: 'Start tracking a new habit.', inputSchema: P({ name: STR }, ['name']) },
+    { name: 'rename_habit', description: 'Rename a habit.', inputSchema: P({ match: STR, new_name: STR }, ['match', 'new_name']) },
+    { name: 'remove_habit', description: 'Stop tracking a habit and delete its history.', inputSchema: P({ match: STR }, ['match']) },
+    { name: 'set_habit_done', description: 'Tick or untick a habit for today or an earlier day this month.', inputSchema: P({
+      match: STR, done: { type: 'boolean' }, day_of_month: { type: 'number', description: 'Defaults to today' } }, ['match']) }
+  ];
+  function aiPrompt(text) {
+    return 'You are the assistant inside Daybook, a daily activity and habit tracker used on a phone. ' +
+      'Make every change the user asks for by calling the tools, and never say you changed something unless a tool did it. ' +
+      'If a request is unclear or matches several items, ask one short question instead of guessing. ' +
+      'Times use 24-hour HH:MM. Activities repeat daily, on weekdays, on weekends, or are today-only; Daybook cannot schedule a specific other date and cannot ring real phone alarms. ' +
+      'Reminder lead is 0, 5, 10 or 30 minutes before, or -1 for none. ' +
+      'Reply in one or two short plain sentences in the language the user wrote in, no markdown.\n\n' +
+      'Current state (JSON): ' + JSON.stringify(OPS.get_state()) + '\n\nUser: ' + text;
+  }
+
+  /* ---------- assistant: basic commands (works offline) ---------- */
+  function stripSpec(t) {
+    var out = { s: t }, m;
+    function cut(re) { m = out.s.match(re); if (m) out.s = out.s.replace(re, ' '); return m; }
+    if (cut(/\b(?:and\s+)?(?:remind(?:er)?s?(?:\s+me)?\s*)?(\d+)\s*(min(?:ute)?s?|hours?|hrs?|h)\s*(?:before|early|earlier|prior)\b/)) {
+      out.lead = nearestLead(+m[1] * (/^h/.test(m[2]) ? 60 : 1));
+    } else if (cut(/\b(?:with\s+)?(?:a\s+)?(?:remind(?:er)?s?(?:\s+me)?\s+)?(?:right\s+)?(?:at|on)\s+(?:the\s+)?(?:same\s+)?time\b|\bon time\b/)) {
+      out.lead = 0;
+    } else if (cut(/\b(?:with\s+)?no\s+(?:reminders?|alerts?|notifications?)\b|\bwithout\s+(?:a\s+)?(?:reminder|alert)\b/)) {
+      out.lead = -1;
+    }
+    if (cut(/\b(?:every\s*day|daily|each\s+day|all\s+days)\b/)) out.repeat = 'daily';
+    else if (cut(/\b(?:on\s+|every\s+|all\s+)?week\s*days\b|\bmonday\s+to\s+friday\b|\bmon\s*-\s*fri\b/)) out.repeat = 'weekdays';
+    else if (cut(/\b(?:on\s+|every\s+|all\s+)?week\s*ends\b|\bevery\s+week\s*end\b|\bsaturday\s+and\s+sunday\b/)) out.repeat = 'weekends';
+    else if (cut(/\b(?:only\s+today|today\s+only|just\s+today|one\s+time|once)\b/)) out.repeat = 'once';
+    if (cut(/\b(?:in|under|as|category|cat)\s+(?:the\s+)?(health|work|home|personal)(?:\s+category)?\b/)) out.cat = m[1];
+    out.s = out.s.replace(/\s+/g, ' ').trim();
+    return out;
+  }
+  function extractTime(t) {
+    var m, re = [
+      /(?:\b(?:at|@|by|around|for)\s+)?\b(\d{1,2})(?:[:.](\d{2}))?\s*([ap])\.?m\b\.?/,
+      /(?:\b(?:at|@|by|around|for)\s+)?\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/,
+      /\b(?:at|@)\s+(\d{1,2})\b(?![:.]?\d)/
+    ];
+    for (var i = 0; i < re.length; i++) {
+      m = t.match(re[i]);
+      if (m) {
+        var v = i === 0 ? mkTime(m[1], m[2], m[3]) : mkTime(m[1], m[2]);
+        if (v) return { time: v, s: t.replace(re[i], ' ').replace(/\s+/g, ' ').trim() };
+      }
+    }
+    m = t.match(/\b(?:at\s+)?(noon|midnight)\b/);
+    if (m) return { time: m[1] === 'noon' ? '12:00' : '00:00', s: t.replace(m[0], ' ').replace(/\s+/g, ' ').trim() };
+    return null;
+  }
+  function cleanTitle(t) {
+    t = t.replace(/\s+/g, ' ').trim();
+    t = t.replace(/^(?:(?:an?|the|new)\s+)*(?:(?:activity|reminder|task|alarm)\s+)?(?:(?:called|named|to|for)\s+|[:\-]\s*)?/, '');
+    var again = true;
+    while (again) {
+      var n = t.replace(/[\s,;:\-]*\b(?:at|on|for|every|in|with|and|to|by|each|a|an|the|remind me|please)\s*$/, '').replace(/[\s,;:\-]+$/, '');
+      again = n !== t; t = n;
+    }
+    t = t.replace(/^(?:remind me\s+)?(?:to\s+)/, '').trim();
+    return t ? (t.charAt(0).toUpperCase() + t.slice(1)).slice(0, 60) : '';
+  }
+  var pend = null;
+  function todayList(onlyLeft) {
+    var l = todays();
+    if (onlyLeft) l = l.filter(function (a) { return !isDone(a.id, curKey); });
+    return l.map(function (a) { return (isDone(a.id, curKey) ? '✓ ' : '• ') + fmt(toMin(a.time)) + '  ' + a.title; }).join('\n');
+  }
+  function habitList() {
+    var t = today0(), mo = state.hlog[mkey(t.y, t.m)] || {};
+    if (!state.habits.length) return 'You are not tracking any habits yet. Try “add habit Read 10 pages”.';
+    return state.habits.map(function (h) { return (((mo[h.id] || []).indexOf(t.d) !== -1) ? '✓ ' : '• ') + h.name; }).join('\n');
+  }
+  var HELP = 'I can arrange Daybook for you. Try:\n' +
+    '• add gym at 6 pm every day\n• remind me to take medicine at 8:30 pm, 10 minutes before\n• move lunch to 1:30 pm\n' +
+    '• make job applications weekdays\n• delete breakfast\n• mark gym done\n• add habit read 10 pages\n' +
+    '• tick exercise habit\n• what is left today?\n• delete all activities';
+  function localOne(raw) {
+    var t = raw.trim().replace(/[.!]+$/, '').trim().toLowerCase(), m;
+    if (!t) return null;
+    for (var k = 0; k < 2; k++) t = t.replace(/^(?:please|pls|hey|hi|ok|okay|daybook|assistant|can you|could you|would you|will you|i want to|i need to|i would like to|i'd like to|let'?s)[\s,]+/, '');
+
+    if (pend) {
+      var p = pend; pend = null;
+      if (p.type === 'clear') {
+        if (/^(?:yes|y|yeah|yep|confirm|ok|okay|sure|do it)\b/.test(t)) {
+          var n = state.activities.length; state.activities = []; state.log = {}; changed();
+          return 'Deleted all ' + n + ' activities.';
+        }
+        return 'Okay, nothing was deleted.';
+      }
+      if (p.type === 'time') {
+        var tm = parseClock(t) || (extractTime(t) || {}).time;
+        if (tm) { var sp0 = stripSpec(t); return OPS.add_activity({ title: p.title, time: tm, repeat: sp0.repeat || p.repeat, category: sp0.cat || p.cat, remind_minutes_before: sp0.lead != null ? sp0.lead : p.lead }).message; }
+      }
+    }
+
+    if (/^(?:help|\?|what can you do|commands)\b/.test(t)) return HELP;
+    if (/^(?:thanks|thank you|thx|great|nice|cool)\b/.test(t)) return 'You are welcome!';
+
+    if (/^(?:delete|remove|clear)\s+(?:all|every)\s*(?:my\s+)?(?:activities|activity|tasks|reminders)?$/.test(t)) {
+      if (!state.activities.length) return 'There are no activities to delete.';
+      pend = { type: 'clear' };
+      return 'Delete all ' + state.activities.length + ' activities? Say yes to confirm.';
+    }
+
+    // add habit
+    m = t.match(/^(?:add|new|create|start|begin|track|start tracking)\s+(?:a\s+)?(?:new\s+)?habit\s*(?:called|named|of|:|-)?\s*(.+)$/) ||
+        t.match(/^(?:add|new|create|track|start tracking)\s+(.+?)\s+(?:as\s+)?(?:a\s+)?habit$/);
+    if (m) return OPS.add_habit({ name: m[1].charAt(0).toUpperCase() + m[1].slice(1) }).message;
+
+    // done / not done
+    m = t.match(/^(?:(untick|uncheck|unmark|undo)|(?:tick|check|mark|log|complete|completed|finish|finished|done(?:\s+with)?|i did|i have done|i've done|i finished|i have finished|i've finished|i completed|i have completed|i've completed))\s+(.+)$/);
+    if (m && !(m[1] === 'undo' && /^(?:that|it|last|the last)/.test(m[2]))) {
+      var want = !m[1], q = m[2];
+      if (/\b(?:not done|undone|pending|incomplete)\b/.test(q)) { want = false; q = q.replace(/\b(?:as\s+)?(?:not done|undone|pending|incomplete)\b/, ''); }
+      var isH = /\bhabit\b/.test(q);
+      q = q.replace(/\b(?:as\s+)?done\b|\bhabit\b|\boff\b|\bfor today\b|\btoday\b|\bcomplete(?:d)?\b|\bthe\b|\bmy\b/g, ' ').replace(/\s+/g, ' ').trim();
+      if (isH) return OPS.set_habit_done({ match: q, done: want }).message;
+      if (findActs(q).length) return OPS.set_activity_done({ match: q, done: want }).message;
+      if (findHabs(q).length) return OPS.set_habit_done({ match: q, done: want }).message;
+      throw new Error('I could not find an activity or habit matching “' + q + '”.');
+    }
+
+    // rename
+    m = t.match(/^rename\s+(?:the\s+)?(?:habit\s+)?(.+?)\s+to\s+(.+)$/);
+    if (m) {
+      var nn = m[2].charAt(0).toUpperCase() + m[2].slice(1);
+      if (/^rename\s+(?:the\s+)?habit\b/.test(t) || (!findActs(m[1]).length && findHabs(m[1]).length)) return OPS.rename_habit({ match: m[1], new_name: nn }).message;
+      return OPS.update_activity({ match: m[1], new_title: nn }).message;
+    }
+
+    // delete
+    m = t.match(/^(?:delete|remove|cancel|drop|stop tracking|get rid of)\s+(?:the\s+)?(.+)$/);
+    if (m) {
+      var dq = m[1].replace(/\s+(?:activity|reminder|task)$/, '');
+      var hq = dq.replace(/\bhabit\b/, ' ').replace(/\s+/g, ' ').trim();
+      if (/\bhabit\b/.test(dq) || /^stop tracking/.test(t)) return OPS.remove_habit({ match: hq }).message;
+      if (findActs(dq).length) return OPS.delete_activity({ match: dq }).message;
+      if (findHabs(dq).length) return OPS.remove_habit({ match: dq }).message;
+      throw new Error('I could not find anything matching “' + dq + '”.');
+    }
+
+    // update
+    m = t.match(/^(move|reschedule|shift|change|set|update|edit|make)\s+(?:the\s+)?(.+?)\s+(?:to|at|for)\s+(.+)$/) ||
+        t.match(/^(make)\s+(?:the\s+)?(.+?)\s+((?:every\s*day|daily|week\s*days|week\s*ends|today only|only today|once|remind.*|no reminders?).*)$/);
+    if (m && !(m[1] === 'set' && !findActs(m[2]).length)) {
+      var rest = m[3], sp = stripSpec(rest), tt = extractTime(sp.s), inp = { match: m[2] };
+      var bare = parseClock(sp.s);
+      if (tt) inp.time = tt.time; else if (bare) inp.time = bare;
+      if (sp.repeat) inp.repeat = sp.repeat;
+      if (sp.lead != null) inp.remind_minutes_before = sp.lead;
+      if (sp.cat) inp.category = sp.cat;
+      var leftover = (tt ? tt.s : sp.s).replace(/^(?:be|remind me|reminders?)\s*/, '').trim();
+      if (!tt && !bare && !sp.repeat && sp.lead == null && !sp.cat && /^(?:change|update|edit)$/.test(m[1]) && leftover) inp.new_title = leftover.charAt(0).toUpperCase() + leftover.slice(1);
+      if (!tt && !bare && !sp.repeat && sp.lead == null && !sp.cat && !inp.new_title) throw new Error('I did not understand what to change. Try “move ' + m[2] + ' to 7 pm”.');
+      return OPS.update_activity(inp).message;
+    }
+
+    // questions
+    if (/^(?:what|whats|what's|show|list|how|any|which|tell|do i|am i|when)\b/.test(t) || /\?$/.test(raw.trim())) {
+      if (/\bhabits?\b/.test(t)) return habitList();
+      if (/\bnext\b/.test(t)) {
+        var nm = nowMin(), lf = todays().filter(function (a) { return !isDone(a.id, curKey); });
+        var nx = lf.filter(function (a) { return toMin(a.time) >= nm; })[0] || lf[0];
+        return nx ? 'Next: ' + fmt(toMin(nx.time)) + ' ' + nx.title + '.' : 'Nothing left for today.';
+      }
+      if (/\b(?:left|remaining|pending|to do|todo|overdue|due|not done|undone)\b/.test(t)) return todayList(true) || 'Everything for today is done.';
+      return todayList(false) || 'No activities are scheduled for today.';
+    }
+
+    // add (explicit verb, or a bare "thing at time")
+    var verb = /^(?:add|create|new|schedule|plan|put|set up|setup|set|remind me(?: to)?|remember to|book)\b\s*/;
+    var hasVerb = verb.test(t), body = t.replace(verb, '');
+    if (/\b(?:tomorrow|next week|next month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/.test(body) && !/week\s*(?:days|ends)/.test(body) && hasVerb) {
+      return 'Daybook cannot schedule for a specific other day. I can add it as a daily, weekday, weekend or today-only activity instead.';
+    }
+    var spc = stripSpec(body), ti = extractTime(spc.s);
+    if (hasVerb || ti) {
+      var title = cleanTitle(ti ? ti.s : spc.s);
+      if (!title) { pend = null; return 'What should the activity be called?'; }
+      var msg;
+      if (!ti) {
+        pend = { type: 'time', title: title, repeat: spc.repeat, cat: spc.cat, lead: spc.lead };
+        return 'What time for “' + title + '”? (for example 6 pm)';
+      }
+      msg = OPS.add_activity({ title: title, time: ti.time, repeat: spc.repeat, category: spc.cat, remind_minutes_before: spc.lead }).message;
+      if (/\balarm\b/.test(t)) msg += '\nThis is a Daybook reminder. To ring a real phone alarm, ask Claude in the chat app.';
+      return msg;
+    }
+    return 'I did not understand that. Say “help” to see what I can do.';
+  }
+  function local(text) {
+    var parts = String(text).split(/\n|;|\s+and then\s+|\s+then\s+/), out = [];
+    var flat = [];
+    parts.forEach(function (p) {
+      var times = p.match(/\d{1,2}(?::\d{2})?\s*[ap]\.?m\b|\bat\s+\d/gi) || [];
+      if (times.length > 1) flat = flat.concat(p.split(/\s+and\s+|,\s*(?=\D)/)); else flat.push(p);
+    });
+    flat.forEach(function (p) {
+      if (!p.trim()) return;
+      try { var r = localOne(p); if (r) out.push(r); }
+      catch (e) { out.push(e && e.message ? e.message : 'Something went wrong.'); }
+    });
+    return out.join('\n') || 'Type a command, or say “help”.';
+  }
+
+  /* ---------- assistant: chat screen ---------- */
+  var sampleFn = null, aiBusy = false, abortCtl = null, hist = [];
+  var msgsEl = $('#msgs'), cin = $('#cinput');
+  function snap() { return JSON.stringify({ a: state.activities, h: state.habits, l: state.log, hl: state.hlog }); }
+  function restore(js) {
+    var o = JSON.parse(js);
+    state.activities = o.a; state.habits = o.h; state.log = o.l; state.hlog = o.hl;
+    changed();
+  }
+  function addMsg(kind, text) {
+    var d = el('div', 'msg ' + kind, text);
+    msgsEl.appendChild(d);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    return d;
+  }
+  function setBusy(b) {
+    aiBusy = b;
+    $('#csend').hidden = b && !!sampleFn;
+    $('#cstop').hidden = !(b && sampleFn);
+    $('#csend').disabled = b;
+  }
+  function finish(bot, text, before) {
+    bot.className = 'msg bot';
+    bot.textContent = text;
+    if (snap() !== before) {
+      Array.prototype.forEach.call(msgsEl.querySelectorAll('.undo'), function (u) { u.remove(); });
+      var u = el('button', 'undo', 'Undo');
+      u.type = 'button';
+      u.addEventListener('click', function () { restore(before); u.textContent = 'Undone'; u.disabled = true; });
+      bot.appendChild(u);
+    }
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    setBusy(false);
+  }
+  function setMode() {
+    $('#chatMode').textContent = sampleFn ? 'Smart · Claude' : 'Basic commands';
+    $('#chatNote').textContent = sampleFn
+      ? 'Claude reads your commands and changes Daybook for you. You can undo the last change.'
+      : 'Basic mode understands short commands like “add gym at 6 pm every day”. Open Daybook inside Claude for the full smart assistant.';
+  }
+  function runAI(text, before, bot) {
+    var ctrl = new AbortController(), ran = 0;
+    abortCtl = ctrl;
+    var tools = AI_TOOLS.map(function (t) {
+      return { name: t.name, description: t.description, inputSchema: t.inputSchema, execute: function (inp) { ran++; return OPS[t.name](inp || {}); } };
+    });
+    var turns = hist.slice(-6).concat([{ role: 'user', content: aiPrompt(text) }]);
+    while (turns.length > 1 && turns[0].role !== 'user') turns.shift();
+    function fallback(prefix) {
+      var r = local(text);
+      hist.push({ role: 'user', content: text }, { role: 'assistant', content: r });
+      finish(bot, (prefix ? prefix + '\n' : '') + r, before);
+    }
+    var pr;
+    try {
+      pr = sampleFn(turns, { tools: tools, modelTier: 'quick', signal: ctrl.signal, onText: function (r) { if (r && r.text) bot.textContent = r.text; } });
+    } catch (e) { pr = Promise.reject(e); }
+    Promise.resolve(pr).then(function (r) {
+      var out = ((r && r.text) || '').trim() || (snap() !== before ? 'Done.' : 'I did not change anything.');
+      hist.push({ role: 'user', content: text }, { role: 'assistant', content: out });
+      finish(bot, out, before);
+    }, function (err) {
+      var code = err && err.code;
+      if (code === 'cancelled') return finish(bot, 'Stopped.', before);
+      if (code === 'not_granted' || code === 'sampling_disabled') { sampleFn = null; setMode(); }
+      if (ran) return finish(bot, 'Something went wrong part-way. Check Today and tap Undo if needed.', before);
+      fallback(code === 'rate_limited' ? 'Claude is busy right now, so I used basic commands.' : (sampleFn ? 'Smart mode had a problem, so I used basic commands.' : 'Smart mode is off, so I used basic commands.'));
+    });
+  }
+  function send(text) {
+    text = String(text || '').trim();
+    if (!text || aiBusy) return;
+    addMsg('user', text);
+    cin.value = '';
+    if (/^undo(?:\s+(?:that|it|last|the last.*))?$/i.test(text)) {
+      var ub = msgsEl.querySelectorAll('.undo:not(:disabled)'), last = ub[ub.length - 1];
+      var rb = addMsg('bot', '');
+      if (last) { last.click(); rb.textContent = 'Undone.'; } else rb.textContent = 'There is nothing to undo.';
+      return;
+    }
+    var before = snap(), bot = addMsg('bot pending', sampleFn ? 'Thinking…' : '…');
+    setBusy(true);
+    if (sampleFn) { runAI(text, before, bot); return; }
+    var r = local(text);
+    hist.push({ role: 'user', content: text }, { role: 'assistant', content: r });
+    finish(bot, r, before);
+  }
+  $('#cform').addEventListener('submit', function (e) { e.preventDefault(); send(cin.value); });
+  $('#cstop').addEventListener('click', function () { if (abortCtl) abortCtl.abort(); });
+  ['Add gym at 6 pm every day', 'What is left today?', 'Tick Exercise habit', 'Move Lunch to 1:30 pm', 'Delete Breakfast'].forEach(function (t) {
+    var b = el('button', 'sug', t);
+    b.type = 'button';
+    b.addEventListener('click', function () { send(t); });
+    $('#sugs').appendChild(b);
+  });
+  addMsg('bot', 'Hi! Tell me what to change in Daybook: add, move or delete activities, tick things off, or manage your habits. Say “help” for examples.');
+  setMode();
+  function initAI() {
+    try {
+      if (!window.claude || typeof window.claude.use !== 'function') return;
+      window.claude.use('sample').then(function (smp) {
+        if (!smp) return;
+        var lim = typeof smp.limits === 'function' ? Promise.resolve(smp.limits()).catch(function () { return null; }) : Promise.resolve(null);
+        lim.then(function (l) {
+          if (l && l.tools === false) return;
+          sampleFn = smp; setMode();
+        });
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
   /* ---------- clock tick ---------- */
   function fireAlerts() {
     var fresh = [];
@@ -1355,6 +1905,7 @@ details.others .row { background: var(--bg); }
   renderAll(true);
   fireAlerts();
   initStorage();
+  initAI();
 })();
 </script>
 
